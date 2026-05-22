@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./routes/auth.route");
 const tourRoutes = require("./routes/tour.route");
+const bookingRoutes = require("./routes/booking.route");
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(morgan("dev"));
 // ROUTES
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/tours", tourRoutes);
+app.use("/api/v1/bookings", bookingRoutes);
 
 
 
