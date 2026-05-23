@@ -99,6 +99,197 @@ const createBooking = async (req, res) => {
 
 
 
+const getMyBookings = async (req, res) => {
+
+    try {
+
+        const bookings = await Booking.find({
+            user: req.user.id,
+        })
+            .populate("tour")
+            .sort({ createdAt: -1 });
+
+
+
+        res.status(200).json({
+            success: true,
+            count: bookings.length,
+            bookings,
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+
+};
+
+
+
+
+const getSingleBooking = async (req, res) => {
+
+    try {
+
+        const booking = await Booking.findById(req.params.id)
+            .populate("tour")
+            .populate("user", "name email");
+
+
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: "Booking not found",
+            });
+        }
+
+
+
+        res.status(200).json({
+            success: true,
+            booking,
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+
+};
+
+
+
+const cancelBooking = async (req, res) => {
+
+    try {
+
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: "Booking not found",
+            });
+        }
+
+
+
+        // only owner can cancel
+        if (booking.user.toString() !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: "Unauthorized",
+            });
+        }
+
+
+
+        booking.status = "cancelled";
+
+        await booking.save();
+
+
+
+        res.status(200).json({
+            success: true,
+            message: "Booking cancelled successfully",
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+
+};
+
+
+const getAllBookings = async (req, res) => {
+
+    try {
+
+        const bookings = await Booking.find()
+            .populate("tour")
+            .populate("user", "name email")
+            .sort({ createdAt: -1 });
+
+
+
+        res.status(200).json({
+            success: true,
+            count: bookings.length,
+            bookings,
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+
+};
+
+
+
+const updateBookingStatus = async (req, res) => {
+
+    try {
+
+        const booking = await Booking.findById(req.params.id);
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: "Booking not found",
+            });
+        }
+
+
+
+        booking.status = req.body.status;
+
+        await booking.save();
+
+
+
+        res.status(200).json({
+            success: true,
+            message: "Booking status updated",
+            booking,
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+
+    }
+
+};
+
+
 module.exports = {
     createBooking,
+    getMyBookings,
+    getSingleBooking,
+    cancelBooking,
+    getAllBookings,
+    updateBookingStatus,
 };
